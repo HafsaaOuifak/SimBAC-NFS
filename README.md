@@ -56,21 +56,21 @@ Runs the full pipeline on Yacht Hydrodynamics (the simplest dataset — 6 featur
 **Python API**
 
 ```python
-from src.models.bagging_ensemble import BaggingFCMTSK
+from src.models.pool import FCMTSKPool
 from src.models.compression import GradNFSCompressor
 from src.datasets.data_loader import load_dataset
 import numpy as np
 
 X, y, feature_names = load_dataset("yacht")
 
-# build pool
+# build pool (T rounds × M models per round)
 T, M, LR = 5, 3, 0.3
 y_res, pool = y.copy(), []
 for t in range(T):
-    bag = BaggingFCMTSK(n_estimators=M, n_rules=15, min_rules=3, random_state=42+t)
-    bag.fit(X, y_res)
-    y_res -= LR * np.mean([e.predict(X) for e in bag.estimators_], axis=0)
-    pool.extend(bag.estimators_)
+    round_models = FCMTSKPool(n_estimators=M, n_rules=15, min_rules=3, random_state=42+t)
+    round_models.fit(X, y_res)
+    y_res -= LR * np.mean([e.predict(X) for e in round_models.estimators_], axis=0)
+    pool.extend(round_models.estimators_)
 
 # compress
 model = GradNFSCompressor(tau=0.95, refit_consequents=True).compress(pool, X, y)
@@ -90,7 +90,7 @@ for i, rule in enumerate(model.get_linguistic_labels(feature_names)):
 ├── src/
 │   ├── models/
 │   │   ├── fcm_tsk.py       FCM-TSK base learner
-│   │   ├── bagging_ensemble.py
+│   │   ├── pool.py          pool construction (rounds × models)
 │   │   ├── compression.py   SIMBA compression (core)
 │   │   └── similarity.py    rule similarity metrics
 │   └── datasets/

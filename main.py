@@ -15,7 +15,7 @@ from sklearn.model_selection import KFold
 warnings.filterwarnings("ignore")
 sys.path.insert(0, os.path.dirname(__file__))
 
-from src.models.bagging_ensemble import BaggingFCMTSK, select_features_mi
+from src.models.pool import FCMTSKPool, select_features_mi
 from src.models.compression import GradNFSCompressor
 from src.datasets.data_loader import load_dataset, DATASETS
 
@@ -47,9 +47,9 @@ def fit_pool(X_tr, y_tr, nc, T, M, lr):
     y_res = y_tr.copy().astype(float)
     pool = []
     for t in range(T):
-        bag = BaggingFCMTSK(n_estimators=M, n_rules=nc, min_rules=MIN_RULES,
-                             base_params={"mf_type": "gaussian"},
-                             random_state=SEED + t)
+        bag = FCMTSKPool(n_estimators=M, n_rules=nc, min_rules=MIN_RULES,
+                         base_params={"mf_type": "gaussian"},
+                         random_state=SEED + t)
         bag.fit(X_tr, y_res)
         y_res -= lr * np.mean([e.predict(X_tr) for e in bag.estimators_], axis=0)
         pool.extend(bag.estimators_)

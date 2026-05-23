@@ -20,8 +20,8 @@ def _fit_one(X, y, n_boot, n_rules, min_rules, min_rule_support, base_params, se
     return model
 
 
-class BaggingFCMTSK:
-    """Bootstrap ensemble of FCM-TSK models."""
+class FCMTSKPool:
+    """One round of SIMBAC-NFS pool construction: M FCM-TSK models on bootstrap samples."""
 
     def __init__(self, n_estimators=10, n_rules=200, min_rules=7,
                  min_rule_support=None, bootstrap_ratio=1.0,
