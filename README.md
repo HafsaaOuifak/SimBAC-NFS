@@ -12,7 +12,7 @@ Run T boosting rounds. In each round, train M bootstrap-resampled FCM-TSK models
 
 **Phase 2 — Compress with SIMBA**
 
-Project all rules into a common space, weight each rule by model performance and rule support, cluster similar rules together, and refit Ridge regression on the compressed rule set. What comes out is one small FCM-TSK model you can inspect as IF-THEN statements.
+Project all rules into a common space, weight each rule by model performance and rule support, cluster similar rules together using antecedent similarity, and refit Ridge regression on the compressed rule set. What comes out is one small FCM-TSK model you can inspect as IF-THEN statements.
 
 ---
 
@@ -33,17 +33,17 @@ Datasets download automatically from UCI on first run — nothing is stored in t
 **Command line**
 
 ```bash
-# single dataset (fast)
+# single dataset
 python main.py --dataset yacht
 
-# all 9 datasets
+# all datasets
 python main.py --dataset all
 
-# custom params
-python main.py --dataset concrete --tau 0.95 --T 5 --M 3 --nc 20
+# tune it yourself
+python main.py --dataset concrete --tau 0.95 --T 5 --M 3 --nc 20 --lr 0.3 --ci 0.99
 ```
 
-Available datasets: `nasa`, `concrete`, `energy_efficiency`, `ccpp`, `airfoil`, `yacht`, `gas_turbine`, `grid_stability`, `parkinsons`
+Available datasets: `concrete`, `energy_efficiency`, `ccpp`, `airfoil`, `yacht`, `gas_turbine`, `grid_stability`, `parkinsons`
 
 **Jupyter notebook**
 
@@ -51,44 +51,34 @@ Available datasets: `nasa`, `concrete`, `energy_efficiency`, `ccpp`, `airfoil`, 
 jupyter lab demo.ipynb
 ```
 
-Runs the full pipeline on Yacht Hydrodynamics — no local data needed. Shows performance metrics, the fuzzy rule base, and membership function plots.
+Runs the full pipeline on Yacht Hydrodynamics (the simplest dataset — 6 features, 308 samples). No local data needed. Shows performance metrics, the fuzzy rule base, and membership function plots.
 
 **Python API**
 
 ```python
 from src.models.bagging_ensemble import BaggingFCMTSK
 from src.models.compression import GradNFSCompressor
+from src.datasets.data_loader import load_dataset
 import numpy as np
+
+X, y, feature_names = load_dataset("yacht")
 
 # build pool
 T, M, LR = 5, 3, 0.3
-y_res, pool = y_train.copy(), []
+y_res, pool = y.copy(), []
 for t in range(T):
     bag = BaggingFCMTSK(n_estimators=M, n_rules=15, min_rules=3, random_state=42+t)
-    bag.fit(X_train, y_res)
-    y_res -= LR * np.mean([e.predict(X_train) for e in bag.estimators_], axis=0)
+    bag.fit(X, y_res)
+    y_res -= LR * np.mean([e.predict(X) for e in bag.estimators_], axis=0)
     pool.extend(bag.estimators_)
 
 # compress
-model = GradNFSCompressor(tau=0.95, refit_consequents=True).compress(pool, X_train, y_train)
+model = GradNFSCompressor(tau=0.95, refit_consequents=True).compress(pool, X, y)
 
-# predict and inspect rules
-y_pred = model.predict(X_test)
+# read the rules
 for i, rule in enumerate(model.get_linguistic_labels(feature_names)):
     print(f"Rule {i+1}: IF " + " AND ".join(f"{f} is {v}" for f, v in rule.items()))
 ```
-
----
-
-## Key parameters
-
-| Parameter | Default | What it does |
-|-----------|---------|-------------|
-| `T` | 5 | boosting rounds |
-| `M` | 3 | bags per round |
-| `nc` | auto (inner CV) | FCM rule budget per base learner |
-| `tau` | 0.95 | how aggressively to merge rules — higher keeps more |
-| `LR` | 0.3 | boosting learning rate |
 
 ---
 
@@ -96,7 +86,7 @@ for i, rule in enumerate(model.get_linguistic_labels(feature_names)):
 
 ```
 ├── main.py                  CLI runner
-├── demo.ipynb               notebook demo
+├── demo.ipynb               notebook demo (Yacht Hydrodynamics)
 ├── src/
 │   ├── models/
 │   │   ├── fcm_tsk.py       FCM-TSK base learner
@@ -104,8 +94,7 @@ for i, rule in enumerate(model.get_linguistic_labels(feature_names)):
 │   │   ├── compression.py   SIMBA compression (core)
 │   │   └── similarity.py    rule similarity metrics
 │   └── datasets/
-│       ├── uci_loader.py    UCI downloader
-│       └── nasa_battery.py  NASA battery loader
+│       └── data_loader.py   loads any dataset from UCI
 ```
 
 ---
