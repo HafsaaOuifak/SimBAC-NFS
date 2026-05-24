@@ -16,7 +16,7 @@ warnings.filterwarnings("ignore")
 sys.path.insert(0, os.path.dirname(__file__))
 
 from src.models.pool import FCMTSKPool, select_features_mi
-from src.models.compression import GradNFSCompressor
+from src.models.compression import SIMBACCompressor
 from src.datasets.data_loader import load_dataset, DATASETS
 
 # paper defaults per dataset
@@ -63,7 +63,7 @@ def inner_cv_select(X_tr, y_tr, tau, T, M, inner_splits, lr, ci):
         for i_tr, i_te in inner_splits:
             try:
                 pool = fit_pool(X_tr[i_tr], y_tr[i_tr], nc, T, M, lr)
-                comp = GradNFSCompressor(tau=tau, weight_by_performance=True,
+                comp = SIMBACCompressor(tau=tau, weight_by_performance=True,
                                          cumulative_importance=ci, min_rules=MIN_RULES,
                                          refit_consequents=True, tune_refit_alpha=True,
                                          refit_alpha_grid=ALPHA_GRID)
@@ -103,7 +103,7 @@ def run_dataset(name, nc=None, tau=None, T=None, M=None, lr=0.3, ci=0.99):
                                          inner_splits, lr, ci)
 
         pool = fit_pool(X_tr_s, y_tr, best_nc, T, M, lr)
-        comp = GradNFSCompressor(tau=tau, weight_by_performance=True,
+        comp = SIMBACCompressor(tau=tau, weight_by_performance=True,
                                   cumulative_importance=ci, min_rules=MIN_RULES,
                                   refit_consequents=True, tune_refit_alpha=True,
                                   refit_alpha_grid=ALPHA_GRID)

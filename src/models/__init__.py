@@ -1,4 +1,4 @@
 from .fcm_tsk import FCMTSKModel
-from .bagging_ensemble import BaggingFCMTSK
+from .pool import FCMTSKPool
 from .similarity import RuleSimilarity
-from .compression import GradNFSCompressor
+from .compression import SIMBACCompressor

@@ -1,6 +1,6 @@
 # SIMBAC-NFS
 
-An interpretable neuro-fuzzy regression model. It builds a large pool of FCM-TSK base learners using both bagging and boosting, then compresses the pool into a small set of fuzzy rules that you can actually read.
+An interpretable neuro-fuzzy regression model. It builds a pool of T×M FCM-TSK base learners across sequential residual-learning rounds, then compresses the pool into a small set of fuzzy rules you can actually read.
 
 ---
 
@@ -8,7 +8,7 @@ An interpretable neuro-fuzzy regression model. It builds a large pool of FCM-TSK
 
 **Phase 1 — Build a hybrid pool**
 
-Run T boosting rounds. In each round, train M bootstrap-resampled FCM-TSK models on the current residuals (bagging within round, boosting across rounds). The pool has T×M base learners.
+Run T rounds. In each round, train M FCM-TSK models on bootstrap samples of the current residuals. Each round focuses on what the previous round left unexplained. The pool has T×M models total.
 
 **Phase 2 — Compress with SIMBA**
 
@@ -57,7 +57,7 @@ Runs the full pipeline on Yacht Hydrodynamics (the simplest dataset — 6 featur
 
 ```python
 from src.models.pool import FCMTSKPool
-from src.models.compression import GradNFSCompressor
+from src.models.compression import SIMBACCompressor
 from src.datasets.data_loader import load_dataset
 import numpy as np
 
@@ -73,7 +73,7 @@ for t in range(T):
     pool.extend(round_models.estimators_)
 
 # compress
-model = GradNFSCompressor(tau=0.95, refit_consequents=True).compress(pool, X, y)
+model = SIMBACCompressor(tau=0.95, refit_consequents=True).compress(pool, X, y)
 
 # read the rules
 for i, rule in enumerate(model.get_linguistic_labels(feature_names)):

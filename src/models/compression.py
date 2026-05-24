@@ -8,7 +8,7 @@ from .fcm_tsk import FCMTSKModel
 from .similarity import RuleSimilarity
 
 
-class GradNFSCompressor:
+class SIMBACCompressor:
     """
     Compress a pool of FCM-TSK models into one compact interpretable model.
 
@@ -87,10 +87,10 @@ class GradNFSCompressor:
             "composite_weights": [0.5, 0.3, 0.2],
             "M_base_learners": len(models),
             "n_rules_per_model": models[0].n_rules,
-            "n_rules_ensemble_total": pooled["centers"].shape[0],
+            "n_pool_rules": pooled["centers"].shape[0],
             "n_rules_after": len(retained),
             "compression_ratio": round(1.0 - len(retained) / pooled["centers"].shape[0], 4),
-            "compression_pct": f"{100*(1 - len(retained)/pooled['centers'].shape[0]):.1f}%",
+            "compression_pct": f"{100*(1 - len(retained) / pooled['centers'].shape[0]):.1f}%",
             "rule_stability_scores": [1.0] * len(retained),
             "refit_alpha": float(getattr(compressed, "refit_alpha_", float("nan"))),
         }

@@ -1,3 +1,3 @@
 """
-SimBA-NFS-v2: Similarity-Aware Neuro-Fuzzy Ensemble Compression
+SIMBAC-NFS: Similarity-Based Antecedent Clustering for Neuro-Fuzzy Systems
 """
