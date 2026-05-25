@@ -12,6 +12,9 @@ build/
 # Data (downloaded on first use, never committed)
 /Datasets/
 data/
+*.parquet
+*.mat
+*.h5
 
 # Results
 results/
