@@ -13,7 +13,7 @@ DATASETS = {
     "airfoil":           (291, None,          []),
     "gas_turbine":       (551, "NOX",         ["CO"]),
     "grid_stability":    (471, "stab",        ["stabf"]),
-    "parkinsons":        (188, "motor_UPDRS", ["total_UPDRS"]),
+    "parkinsons":        (189, "motor_UPDRS", ["total_UPDRS"]),
 }
 
 # Datasets that ucimlrepo cannot fetch — loaded via direct URL instead
@@ -51,6 +51,15 @@ def load_dataset(name):
 
     X_df = repo.data.features
     y_df = repo.data.targets
+
+    # some datasets return features=None; fall back to the combined original frame
+    if X_df is None:
+        df_all = repo.data.original
+        all_drop = ([target_col] if target_col else []) + drop_cols
+        cols_to_keep = [c for c in df_all.columns if c not in all_drop]
+        X_df = df_all[cols_to_keep]
+        y_df = df_all[[target_col]] if target_col else df_all.iloc[:, [-1]]
+        drop_cols = []  # already handled above
 
     # some UCI datasets return targets=None and include target col in features
     if y_df is None or (target_col is not None and target_col not in (y_df.columns if y_df is not None else [])):
