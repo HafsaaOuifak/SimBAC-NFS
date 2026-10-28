@@ -146,8 +146,13 @@ Tested on 9 UCI regression datasets using 5-fold cross-validation (LOBO for NASA
 
 ```bibtex
 @article{ouifak2026simbac,
-  title  = {SIMBAC-NFS: Similarity-Based Aggregation and Calibration of Neuro-Fuzzy Systems},
-  author = {Ouifak, Hafsaa and Idri, Ali},
-  year   = {2026}
+  title={SimBAC-NFS: Similarity-Based Aggregation and Calibration of Neuro-Fuzzy Systems},
+  author={Ouifak, Hafsaa and Idri, Ali},
+  journal={Applied Computational Intelligence and Soft Computing},
+  volume={2026},
+  number={1},
+  pages={3194148},
+  year={2026},
+  publisher={Wiley Online Library}
 }
 ```
